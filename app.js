@@ -339,65 +339,108 @@
   }
 
   /**
+   * Helper to safely sanitize and render show summary HTML
+   * @param {string} html 
+   * @returns {string} Safe HTML string
+   */
+  function sanitizeSummary(html) {
+    if (!html || typeof html !== 'string') {
+      return '<p class="text-slate-400 italic">No summary description available for this show.</p>';
+    }
+
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      
+      // Strip potentially harmful elements
+      const elementsToRemove = doc.querySelectorAll('script, iframe, object, embed, style, link, form, input, button');
+      elementsToRemove.forEach(el => el.remove());
+      
+      const cleanContent = doc.body.innerHTML.trim();
+      return cleanContent || '<p class="text-slate-400 italic">No summary description available for this show.</p>';
+    } catch (e) {
+      return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+    }
+  }
+
+  /**
    * Modal Details Drawer Opener
-   * Fetches Show Details with embedded cast via window.TVMazeAPI.getShowDetails
+   * Fetches full Show Details with embedded cast via window.TVMazeAPI.getShowDetails(showId)
    * @param {number|string} showId 
    */
   async function openModal(showId) {
+    // Show spinner inside modal container
     elements.modalContent.innerHTML = `
-      <div class="p-12 text-center space-y-4">
+      <div class="p-16 text-center space-y-4">
         <div class="w-12 h-12 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
         <p class="text-sm font-semibold text-slate-300">Fetching show details & cast members...</p>
       </div>
     `;
 
+    // Display Modal with smooth transitions
     elements.modalBackdrop.classList.add('active');
     elements.modalContainer.classList.add('active');
     document.body.style.overflow = 'hidden';
 
     try {
+      // 1. Fetch full show details with embedded cast from TVMaze API
       const fullDetails = await window.TVMazeAPI.getShowDetails(showId);
       const show = normalizeShowData(fullDetails);
       const castList = fullDetails._embedded?.cast || [];
 
+      // Format Genre Pills
       const genrePills = show.genres.map(g => 
         `<span class="text-xs bg-brand-500/20 text-brand-300 border border-brand-500/30 px-3 py-1 rounded-full font-medium">${escapeHtml(g)}</span>`
       ).join(' ');
 
+      // Format Rating Badge
       const ratingBadge = show.rating !== 'N/A'
-        ? `<span class="inline-flex items-center gap-1 text-sm font-extrabold text-amber-400 bg-amber-400/10 border border-amber-400/30 px-3 py-1 rounded-full"><i class="fa-solid fa-star text-xs"></i> ${show.rating} / 10</span>`
+        ? `<span class="inline-flex items-center gap-1.5 text-sm font-extrabold text-amber-400 bg-amber-400/10 border border-amber-400/30 px-3 py-1 rounded-full"><i class="fa-solid fa-star text-xs"></i> ${show.rating} / 10</span>`
         : `<span class="inline-flex items-center gap-1 text-xs font-medium text-slate-400 bg-slate-800 px-3 py-1 rounded-full">Unrated</span>`;
 
+      // Safe HTML Summary
+      const safeSummary = sanitizeSummary(show.summary);
+
+      // Format Premiered Date
+      const premieredDisplay = show.premieredDate || show.premiered || 'N/A';
+
+      // Format Cast List (Top 6 members with fallback avatar)
       const castHtml = castList.length > 0 
         ? castList.slice(0, 6).map(member => `
-            <div class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80">
+            <div class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-900/70 border border-slate-800/80 hover:border-slate-700 transition-colors">
               <img 
                 src="${member.person?.image?.medium || PLACEHOLDER_AVATAR}" 
                 alt="${escapeHtml(member.person?.name || 'Actor')}" 
-                class="w-10 h-10 rounded-full object-cover border border-slate-700/60"
+                class="w-11 h-11 rounded-full object-cover border border-slate-700/80 flex-shrink-0"
+                loading="lazy"
                 onerror="this.onerror=null; this.src='${PLACEHOLDER_AVATAR}';"
               />
               <div class="min-w-0 flex-1">
-                <span class="block text-xs font-bold text-white truncate">${escapeHtml(member.person?.name || 'Actor')}</span>
-                <span class="block text-[11px] text-slate-400 truncate">as ${escapeHtml(member.character?.name || 'Character')}</span>
+                <span class="block text-xs font-bold text-white truncate" title="${escapeHtml(member.person?.name || 'Actor')}">
+                  ${escapeHtml(member.person?.name || 'Actor')}
+                </span>
+                <span class="block text-[11px] text-slate-400 truncate" title="as ${escapeHtml(member.character?.name || 'Character')}">
+                  as ${escapeHtml(member.character?.name || 'Character')}
+                </span>
               </div>
             </div>
           `).join('')
-        : '<p class="text-xs text-slate-500 italic">No cast information available for this show.</p>';
+        : '<p class="text-xs text-slate-500 italic col-span-full">No cast information available for this show.</p>';
 
       elements.modalContent.innerHTML = `
-        <!-- Modal Header Banner -->
+        <!-- Modal Banner & Poster Header -->
         <div class="relative h-64 sm:h-80 w-full overflow-hidden bg-slate-950">
           <img 
             src="${show.imageLarge}" 
             alt="${escapeHtml(show.name)}"
-            class="w-full h-full object-cover object-top opacity-50 blur-xs scale-105"
+            class="w-full h-full object-cover object-top opacity-40 blur-xs scale-105"
             onerror="this.onerror=null; this.src='${PLACEHOLDER_POSTER}';"
           />
-          <div class="absolute inset-0 bg-gradient-to-t from-brand-modalBg via-brand-modalBg/60 to-transparent"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-brand-modalBg via-brand-modalBg/70 to-transparent"></div>
           
+          <!-- Header Overlay Details -->
           <div class="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row items-start sm:items-end gap-5">
-            <div class="w-24 sm:w-32 aspect-[2/3] rounded-xl overflow-hidden shadow-2xl border-2 border-slate-700/80 flex-shrink-0 bg-slate-900 hidden sm:block">
+            <div class="w-24 sm:w-32 aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-700/80 flex-shrink-0 bg-slate-900 hidden sm:block">
               <img 
                 src="${show.image}" 
                 alt="${escapeHtml(show.name)}"
@@ -405,11 +448,11 @@
                 onerror="this.onerror=null; this.src='${PLACEHOLDER_POSTER}';"
               />
             </div>
-            <div class="space-y-2">
+            <div class="space-y-2 max-w-xl">
               <div class="flex flex-wrap items-center gap-2">
                 ${ratingBadge}
-                <span class="text-xs bg-slate-800 border border-slate-700 text-slate-300 px-2.5 py-1 rounded-full font-medium">
-                  ${show.status}
+                <span class="text-xs bg-slate-800/90 border border-slate-700 text-slate-300 px-2.5 py-1 rounded-full font-medium">
+                  ${escapeHtml(show.status)}
                 </span>
               </div>
               <h2 class="font-heading font-black text-2xl sm:text-4xl text-white tracking-tight leading-tight">
@@ -422,12 +465,12 @@
         <!-- Modal Body Details -->
         <div class="p-6 sm:p-8 space-y-6">
           
-          <!-- Metadata Grid -->
+          <!-- Metadata Info Grid -->
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-slate-900/80 border border-slate-800/80 rounded-2xl text-xs">
             <div>
               <span class="text-slate-400 block mb-1">Premiered</span>
               <span class="font-semibold text-white flex items-center gap-1.5">
-                <i class="fa-solid fa-calendar text-brand-500"></i> ${show.premiered}
+                <i class="fa-solid fa-calendar text-brand-500"></i> ${escapeHtml(premieredDisplay)}
               </span>
             </div>
             <div>
@@ -439,13 +482,13 @@
             <div>
               <span class="text-slate-400 block mb-1">Runtime</span>
               <span class="font-semibold text-white flex items-center gap-1.5">
-                <i class="fa-solid fa-clock text-brand-accent"></i> ${show.runtime}
+                <i class="fa-solid fa-clock text-brand-accent"></i> ${escapeHtml(show.runtime)}
               </span>
             </div>
             <div>
               <span class="text-slate-400 block mb-1">Language</span>
               <span class="font-semibold text-white flex items-center gap-1.5">
-                <i class="fa-solid fa-globe text-emerald-400"></i> ${show.language}
+                <i class="fa-solid fa-globe text-emerald-400"></i> ${escapeHtml(show.language)}
               </span>
             </div>
           </div>
@@ -456,20 +499,20 @@
             ${genrePills || '<span class="text-xs text-slate-500">None specified</span>'}
           </div>
 
-          <!-- Overview Summary -->
+          <!-- Overview & Summary (Rendered Safely) -->
           <div>
             <h4 class="font-heading text-sm uppercase tracking-wider font-bold text-slate-400 mb-2 flex items-center gap-2">
-              <i class="fa-solid fa-align-left text-brand-500"></i> Overview & Plot
+              <i class="fa-solid fa-align-left text-brand-500"></i> Overview & Plot Summary
             </h4>
             <div class="summary-content bg-slate-900/40 p-5 rounded-2xl border border-slate-800/60 leading-relaxed">
-              ${show.summary}
+              ${safeSummary}
             </div>
           </div>
 
-          <!-- Featured Cast -->
+          <!-- Embedded Cast Members -->
           <div>
             <h4 class="font-heading text-sm uppercase tracking-wider font-bold text-slate-400 mb-3 flex items-center gap-2">
-              <i class="fa-solid fa-user-group text-brand-cyan"></i> Featured Cast
+              <i class="fa-solid fa-user-group text-brand-cyan"></i> Featured Cast Members
             </h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               ${castHtml}
@@ -479,7 +522,7 @@
           <!-- Action Footer inside Modal -->
           <div class="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-4">
             <a 
-              href="${show.officialSite}" 
+              href="${escapeHtml(show.officialSite)}" 
               target="_blank" 
               rel="noopener noreferrer" 
               class="inline-flex items-center gap-2 bg-gradient-to-r from-brand-600 to-brand-accent hover:from-brand-500 hover:to-brand-600 text-white font-semibold text-xs px-5 py-3 rounded-xl shadow-lg shadow-brand-600/30 transition-all duration-300"
@@ -490,7 +533,7 @@
             <button 
               type="button" 
               onclick="document.getElementById('modalCloseBtn').click()" 
-              class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-5 py-3 rounded-xl border border-slate-700 transition-all"
+              class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold px-5 py-3 rounded-xl border border-slate-700 transition-all"
             >
               Close Window
             </button>
@@ -505,7 +548,7 @@
           <div class="w-12 h-12 bg-red-900/40 text-red-400 rounded-full flex items-center justify-center text-xl mx-auto">
             <i class="fa-solid fa-triangle-exclamation"></i>
           </div>
-          <h4 class="font-bold text-white text-base">Error Loading Details</h4>
+          <h4 class="font-bold text-white text-base">Error Loading Show Details</h4>
           <p class="text-xs text-slate-400">${escapeHtml(error.message)}</p>
           <button onclick="document.getElementById('modalCloseBtn').click()" class="bg-slate-800 text-white text-xs px-4 py-2 rounded-xl">Close</button>
         </div>
