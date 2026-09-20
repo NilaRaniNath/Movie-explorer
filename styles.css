@@ -1,0 +1,98 @@
+/* Custom Customizations & Keyframe Animations */
+
+/* Custom Scrollbar */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.4);
+  border-radius: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.7);
+}
+
+/* Genre Pills */
+.genre-pill {
+  background-color: rgba(30, 41, 59, 0.8);
+  color: #94a3b8;
+  border: 1px solid rgba(51, 65, 85, 0.7);
+}
+
+.genre-pill:hover {
+  background-color: rgba(51, 65, 85, 0.9);
+  color: #f8fafc;
+}
+
+.genre-pill.active {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* Show Card Hover Glow Effects */
+.show-card {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.show-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.15), 0 8px 10px -6px rgba(99, 102, 241, 0.1);
+}
+
+.show-card:hover .poster-img {
+  transform: scale(1.05);
+}
+
+.poster-img {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Modal States */
+#modalBackdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#modalContainer.active {
+  transform: scale(1);
+}
+
+/* Summary HTML typography styling inside Modal */
+.summary-content {
+  color: #cbd5e1;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+}
+
+.summary-content p {
+  margin-bottom: 0.875rem;
+}
+
+.summary-content b, .summary-content strong {
+  color: #f8fafc;
+  font-weight: 600;
+}
+
+.summary-content i, .summary-content em {
+  color: #a5b4fc;
+}
+
+.summary-content a {
+  color: #818cf8;
+  text-decoration: underline;
+}
+
+/* Image fallback overlay placeholder styling */
+.img-fallback-bg {
+  background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+}
