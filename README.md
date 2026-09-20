@@ -1,188 +1,136 @@
-# 🎬 Assignment: Movie Explorer
+# 📺 ShowPulse — TV Shows Explorer
 
-> **Objective:** Build a responsive **Movie Explorer Application** using React. Users should be able to browse movies, search for specific titles, and view detailed information in an interactive modal.
+A modern, responsive **TV Shows Explorer** web application built with **HTML5**, **Tailwind CSS v3**, and **Vanilla JavaScript**, powered by the free [TVMaze Open API](https://www.tvmaze.com/api).
 
----
-
-## 🛠️ Technology Stack
-
-* **Core:** JavaScript, React
-* **Styling:** CSS, Tailwind CSS *(Optional but recommended)*
-* **Data:** Free Movie Database API *(e.g., OMDB, TMDB, TVMaze)*
-* **TVMaze Doc:** [API](https://www.tvmaze.com/api)
+🔗 **Live Demo:** [showpulse.vercel.app](https://movie-explorer-nilaraninath.vercel.app)  
+📁 **GitHub Repo:** [github.com/NilaRaniNath/Movie-explorer](https://github.com/NilaRaniNath/Movie-explorer)
 
 ---
 
-## 📋 Features & Requirements
+## 🚀 Features
 
-###  1. Home Page
+- 🔍 **Live Search** — Real-time debounced (400ms) TV show search powered by TVMaze API
+- 🎬 **Browse Popular Shows** — Default grid of popular shows loaded on page open
+- 🏷️ **Dynamic Genre Filters** — Filter shows by genre with auto-generated pill buttons
+- ⭐ **Sorting** — Sort by Top Rated, Name (A–Z), or Premiered Year
+- 🃏 **Show Cards** — Poster image, title, rating, genres, language & status on each card
+- 🪟 **Detailed Modal Popup** — Click "View Details" to see:
+  - Show banner & poster thumbnail
+  - Full title, rating, premiered date, network, runtime, language
+  - Genre tags
+  - Safe HTML overview/plot summary
+  - Embedded cast members list with photos
+  - Official site link
+- 🎲 **Surprise Me Button** — Opens a random show's details
+- ⏳ **Loading Skeleton** — Animated skeleton cards while data is fetching
+- 🚫 **Empty State** — "No Shows Found" UI when search returns no results
+- ❌ **Error State** — Friendly error message with retry button on API failure
+- 📱 **Fully Responsive** — Mobile-first layout adapting from 1 to 5 columns
+- ♿ **Accessible** — Keyboard navigation (`Escape` to close modal), ARIA labels
 
-The Home Page serves as the landing page and must include the following sections:
+---
 
-####  Navbar
-* Application logo or brand name.
-* Navigation links.
-* A prominent button/link to navigate to the **Movie Listing Page**.
+## 🛠️ Tech Stack
 
-####  Hero Banner
-A visually attractive section to hook the user. It must include:
-* A movie-related background image or gradient.
-* Application title/heading.
-* A short, engaging description.
-* A Call-To-Action (CTA) button navigating to the **Movie Listing Page**.
+| Technology | Purpose |
+|---|---|
+| HTML5 | Semantic page structure |
+| [Tailwind CSS v3 (CDN)](https://cdn.tailwindcss.com) | Utility-first styling & dark mode |
+| Vanilla JavaScript (ES6+) | DOM manipulation & API logic |
+| [TVMaze Open API](https://www.tvmaze.com/api) | Live TV show data (no API key required) |
+| [Google Fonts](https://fonts.google.com) | Inter & Outfit typefaces |
+| [Font Awesome 6](https://fontawesome.com) | Icons |
+| [Vercel](https://vercel.com) | Static site deployment |
 
-**📐 UI Wireframe Example:**
-```text
-╭──────────────────────────────────────────────────────╮
-│  🎬 MovieExplorer                        [ Movies ]  │
-├──────────────────────────────────────────────────────┤
-│                                                      │
-│                 DISCOVER MOVIES                      │
-│                                                      │
-│        Explore and discover your favorite            │
-│        movies from around the world.                 │
-│                                                      │
-│                 [   Explore Now ]                    │
-│                                                      │
-╰──────────────────────────────────────────────────────╯
+---
+
+## 📁 Project Structure
+
+```
+Movie-explorer/
+├── index.html        # Main HTML page — layout, header, search, grid, modal, footer
+├── styles.css        # Custom CSS — animations, genre pills, modal transitions, scrollbars
+├── api.js            # TVMaze API service module (searchShows, getPopularShows, getShowDetails)
+├── app.js            # App logic — DOM rendering, UI states, debounced search, modal
+├── vercel.json       # Vercel deployment configuration
+└── README.md         # Project documentation
 ```
 
-####  Footer
-* Application name.
-* Copyright information (e.g., `© 2026 MovieExplorer`).
-* Optional social media or GitHub links.
+---
+
+## 🌐 API Reference (TVMaze)
+
+All data is fetched from the free, public [TVMaze REST API](https://www.tvmaze.com/api) — **no API key required**.
+
+| Function | Endpoint |
+|---|---|
+| `getPopularShows()` | `GET https://api.tvmaze.com/shows` |
+| `searchShows(query)` | `GET https://api.tvmaze.com/search/shows?q={query}` |
+| `getShowDetails(id)` | `GET https://api.tvmaze.com/shows/{id}?embed=cast` |
 
 ---
 
-###  2. Movie Listing Page
+## ⚙️ Running Locally
 
-Create a dedicated page where users can browse and search for movies.
+No build tools or package manager needed.
 
-####  Search Functionality
-* Include a prominent search bar at the top of the page.
-* Users must be able to search by **movie title**.
-* The movie grid should dynamically update based on the search query.
-
-** UI Wireframe Example:**
-```text
-╭──────────────────────────────────────────────────────╮
-│  🔍 Search for a movie...                            │
-╰──────────────────────────────────────────────────────╯
-```
-### Search Shows
-
-**Endpoint:** `GET /search/shows?q=:query`
-
-**Example:**
 ```bash
-GET https://api.tvmaze.com/search/shows?q=girls
+# Clone the repository
+git clone https://github.com/NilaRaniNath/Movie-explorer.git
+
+# Navigate to the project folder
+cd Movie-explorer
+
+# Open index.html in your browser OR use a local server:
+npx serve .
 ```
 
-#### 🌐 API Integration & State Management
-Fetch movie data from your chosen **Free Movie Database API**. 
-
-#### 🎬 Movie Cards
-Display movies using reusable Card components. Each card must include:
-* Movie poster image.
-* Movie title/name.
-* Release year/date.
-* Rating (e.g., ⭐ 8.5).
-* A `See Details` button.
-
-** UI Wireframe Example:**
-```text
-╭─────────────────────╮
-│                     │
-│       Poster        │
-│                     │
-├─────────────────────┤
-│  Movie Title        │
-│  ⭐ 8.5  •  📅2024 │
-│                     │
-│  [ See Details ]    │
-╰─────────────────────╯
-```
->  **Requirement:** Cards must be displayed using a **responsive CSS Grid or Flexbox layout**.
+Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-### All Shows/Movie
+## 📸 Screenshots
 
-**Endpoint:**  
-`GET /shows`
+### Home / Hero Section
+![Hero Section](https://github.com/NilaRaniNath/Movie-explorer/raw/main/screenshots/hero.png)
 
-**Example:**  
-```bash
-GET https://api.tvmaze.com/shows
-```
+### TV Show Cards Grid
+![Shows Grid](https://github.com/NilaRaniNath/Movie-explorer/raw/main/screenshots/grid.png)
 
-**Description:**  
-Fetch all available TV shows.
-
-
-### 🎞️ 3. Movie Details Modal
-
-When a user clicks the **See Details** button, open a modal overlay displaying in-depth information about the selected movie.
-
-**Modal Contents:**
-* Movie backdrop image or large poster.
-* Movie title.
-* Overview / Summary.
-* Rating and Release date.
-* Any additional relevant info from the API (e.g., Genre, Director).
-
-** UI Wireframe Example:**
-```text
-╭──────────────────────────────────────────────╮
-│                                      [ ✕ ]   │
-├──────────────────────────────────────────────┤
-│                                              │
-│               MOVIE BACKDROP                 │
-│                                              │
-├──────────────────────────────────────────────┤
-│  Movie Title                                 │
-│  ⭐ Rating: 8.5   |   📅 Release: 2024      │
-│                                              │
-│  Overview:                                   │
-│  Movie description goes here...              │
-│                                              │
-│                              [ ❌ Close ]    │
-╰──────────────────────────────────────────────╯
-```
-
-**Interaction Requirements:**
-* Must be closable via the `✕` (Close) button.
-* *Optional:* Closable by clicking outside the modal (on the backdrop).
+### Show Details Modal
+![Show Details Modal](https://github.com/NilaRaniNath/Movie-explorer/raw/main/screenshots/modal.png)
 
 ---
 
-## 📱 Responsive Design & UX
+## 📱 Responsive Breakpoints
 
-The application must be fully responsive and provide a seamless experience across all devices:
-*  **Mobile:** Single column layout, stacked elements, touch-friendly buttons.
-*  **Desktop:** 3-4+ column grid for movie cards, optimized spacing.
-
----
-
-## Submission Guidelines
-
-Students must submit the following via the designated submission portal:
-
-1.  **GitHub Repository Link** *(Ensure it is public and includes a `README.md`)*.
-2.  **Live Deployment Link** *(e.g., Vercel, Netlify, GitHub Pages)*.
+| Screen | Grid Columns |
+|---|---|
+| Mobile (`< 640px`) | 1 column |
+| Tablet (`640px+`) | 2 columns |
+| Laptop (`768px+`) | 3 columns |
+| Desktop (`1024px+`) | 4 columns |
+| Wide (`1280px+`) | 5 columns |
 
 ---
 
-## Assignment Deadline: (2 Days)
+## 🎓 Assignment Details
 
-* **60 Marks:** September 17, 2026, 11:59 PM
-* **50 Marks:** September 18, 2026, 11:59 PM
+This project was built as part of the **Foundation Program — Assignment 2** at [Programming Hero](https://programming-hero.com/).
+
+**Submission Deadline:**
+- 60 Marks: September 17, 2026, 11:59 PM
+- 50 Marks: September 18, 2026, 11:59 PM
 
 ---
 
-## ⚠️ Plagiarism & AI Policy:
+## 👩‍💻 Author
 
-* **Zero Tolerance:** Plagiarism will result in **0 marks**.
-* **No Copying:** Do not copy code from peers or online sources.
-* **No AI Code:** Do not use AI generators. We actively run AI code detection tools.
-* **Original Work:** All code must be 100% your own.
+**Nila Rani Nath**  
+GitHub: [@NilaRaniNath](https://github.com/NilaRaniNath)
+
+---
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
